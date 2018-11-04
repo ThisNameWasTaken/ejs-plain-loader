@@ -1,4 +1,4 @@
-# ejs-template-loader
+# ejs-plain-loader
 
 [![npm](https://img.shields.io/npm/v/ejs-plain-loader.svg)](https://www.npmjs.com/package/ejs-plain-loader)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ThisNameWasTaken/ejs-plain-loader/blob/master/LICENSE)
