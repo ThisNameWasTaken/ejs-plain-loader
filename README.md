@@ -10,55 +10,55 @@
 
 ## Instalation
 ```
-    npm install --save-dev ejs-plain-loader
+npm install --save-dev ejs-plain-loader
 ```
 
 __NOTE:__ EJS is a peer dependency so you may also need to install it.
 
 ```
-    npm install --save-dev ejs
+npm install --save-dev ejs
 ```
 
 ## Usage
 Inside your `webpack config file` add the fallowing rules
 ```js
-    module.exports = {
-        ...
+module.exports = {
+    ...
 
-        module: {
-        rules: [{
-            test: /\.ejs$/i,
-            use: {
-                loader: 'ejs-plain-loader'
-            }
-        }]
+    module: {
+    rules: [{
+        test: /\.ejs$/i,
+        use: {
+            loader: 'ejs-plain-loader'
+        }
+    }]
 
-        ...
-    }
+    ...
+}
 ```
 
 You can chain the ejs-plain-loader with other loaders such as the [html-loader](https://www.npmjs.com/package/html-loader)
 
 ```js
-    module.exports = {
-        ...
+module.exports = {
+    ...
 
-        module: {
-        rules: [{
-            test: /\.ejs$/i,
-            use: [{
-                loader: 'html-loader',
-                options: {
-                    attrs: [':src', ':data-src', 'source:srcset', 'source:data-srcset'], // load(require) images, videos or other resources
-                    interpolate: true
-                }
-            }, {
-                loader: 'ejs-plain-loader'
-            }]
+    module: {
+    rules: [{
+        test: /\.ejs$/i,
+        use: [{
+            loader: 'html-loader',
+            options: {
+                attrs: [':src', ':data-src', 'source:srcset', 'source:data-srcset'], // load(require) images, videos or other resources
+                interpolate: true
+            }
+        }, {
+            loader: 'ejs-plain-loader'
         }]
+    }]
 
-        ...
-    }
+    ...
+}
 ```
 
 ## Options
