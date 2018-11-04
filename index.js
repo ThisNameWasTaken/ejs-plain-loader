@@ -9,5 +9,6 @@ module.exports = function (source) {
     }, getOptions(this));
 
     const template = ejs.compile(source, options);
+    template.dependencies.forEach(this.addDependency);
     return template(options.data || {});
 }
