@@ -10,14 +10,10 @@
 
 ## Instalation
 ```
-npm install --save-dev ejs-plain-loader
+npm install --save-dev ejs-plain-loader ejs
 ```
 
-__NOTE:__ EJS is a peer dependency so you may also need to install it.
-
-```
-npm install --save-dev ejs
-```
+_NOTE:_ EJS is a peer dependency so you also need to install it.
 
 ## Usage
 Inside your `webpack config file` add the fallowing rules
