@@ -17,11 +17,13 @@ module.exports = function (source, map, meta) {
             const template = ejs.compile(source, options);
 
             const addDependencies = dependency => {
-                this.addDependency(dependency);
+                if (!this.getDependencies().includes(dependency)) {
+                    this.addDependency(dependency);
+                }
+
                 return readFile(dependency, 'utf8').then(source => {
                     const subTemplate = ejs.compile(source, Object.assign(options, { filename: dependency }));
                     if (subTemplate.dependencies.length) {
-                        subTemplate.dependencies.forEach(this.addDependency);
                         return subTemplate.dependencies.map(addDependencies);
                     }
                     return Promise.resolve();
