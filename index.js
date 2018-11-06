@@ -16,18 +16,19 @@ module.exports = function (source, map, meta) {
         try {
             const template = ejs.compile(source, options);
 
-            const addDependencies = dependency => {
+            const addDependencies = async dependency => {
                 if (!this.getDependencies().includes(dependency)) {
                     this.addDependency(dependency);
                 }
 
-                return readFile(dependency, 'utf8').then(source => {
-                    const subTemplate = ejs.compile(source, Object.assign(options, { filename: dependency }));
-                    if (subTemplate.dependencies.length) {
-                        return subTemplate.dependencies.map(addDependencies);
-                    }
-                    return Promise.resolve();
-                }).catch(err => cb(err));
+                const source = await readFile(dependency, 'utf8');
+                const subTemplate = ejs.compile(source, Object.assign(options, { filename: dependency }));
+
+                if (subTemplate.dependencies.length) {
+                    return subTemplate.dependencies.map(addDependencies);
+                }
+
+                return Promise.resolve();
             }
 
             await Promise.all(template.dependencies.map(addDependencies));
