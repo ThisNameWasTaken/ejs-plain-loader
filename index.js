@@ -3,6 +3,8 @@ const readFile = promisify(require('fs').readFile);
 const ejs = require('ejs');
 const { getOptions } = require('loader-utils');
 
+let cachedDependencies = {};
+
 module.exports = function (source, map, meta) {
     const callback = this.async();
 
@@ -16,16 +18,18 @@ module.exports = function (source, map, meta) {
         try {
             const template = ejs.compile(source, options);
 
+            cachedDependencies.source = [];
+
             const addDependencies = async dependency => {
                 if (!this.getDependencies().includes(dependency)) {
                     this.addDependency(dependency);
+                    cachedDependencies.source.push(dependency);
                 }
 
                 const source = await readFile(dependency, 'utf8');
                 const subTemplate = ejs.compile(source, Object.assign(options, { filename: dependency }));
-
                 if (subTemplate.dependencies.length) {
-                    return subTemplate.dependencies.map(addDependencies);
+                    await Promise.all(subTemplate.dependencies.map(addDependencies));
                 }
 
                 return Promise.resolve();
@@ -34,6 +38,9 @@ module.exports = function (source, map, meta) {
             await Promise.all(template.dependencies.map(addDependencies));
             cb(null, template(options.data || {}));
         } catch (error) {
+            if (cachedDependencies.source) {
+                cachedDependencies.source.forEach(this.addDependency);
+            }
             cb(error);
         }
     }
