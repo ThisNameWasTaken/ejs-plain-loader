@@ -57,6 +57,71 @@ module.exports = {
 }
 ```
 
+## Importing partials
+
+```html
+    <!-- plain import -->
+    <%- include('partials/my-awesome-partial.ejs') %>
+
+    <!-- appending data -->
+    <%- include('partials/card.ejs', {
+            title: 'Lorem ipsum',
+            content: 'Lorem ipsum dolor sit amet',
+            actions: ['read more', 'add to favorites']
+    }) %>
+```
+
+__Note:__ When adding partials use this syntax `<%- include('partials/navbar.ejs') %>` as opposed to `<%- import partials/navbar %>`.
+
+__Why?:__ Adding partials using the `<%- import partials/navbar %>` does not add the `navbar.ejs` file to the loader dependecies which means that if you make a change inside `navbar.ejs` that change will not be picked up by the loader so you will have to save `index.ejs` (or whatever your parent template is called) as well, where as adding partials like `<% import('partials/navbar') %>` solves this problem.
+
+__Example:__
+
+`index.ejs`
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/header.ejs', {
+            title: 'Webpack Starter App',
+            author: 'John Doe',
+            keywords: ['lorem', 'ipsum', 'dolor', 'sit', 'amet'],
+            description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit.'
+    }) %>
+</head>
+<body>
+    <%- include('partials/navbar.ejs') %>
+
+    <main>
+        <!-- MAIN CONTENT -->
+    </main>
+    
+    <%- include('partials/footer.ejs') %>
+</body>
+</html>
+```
+
+`header.ejs`
+```html
+    <%
+        if (typeof description === 'undefined')  description = 'placeholder';
+        if (typeof keywords === 'undefined') keywords = ['placeholder'];
+        if (typeof author === 'undefined') author = 'placeholder';
+        if (typeof title === 'undefined') title = 'placeholder';
+    %>
+
+    <meta charset="UTF-8">
+    <meta name="description" content="<%= description %>">
+    <meta name="keywords" content="<%= keywords.join(',') %>">
+    <meta name="author" content="<%= author %>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= title %></title>
+```
+
+## Tags
+See [tags](https://www.npmjs.com/package/ejs#tags)
+
 ## Options
 See [EJS options](https://www.npmjs.com/package/ejs#options)
 
