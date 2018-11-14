@@ -47,15 +47,21 @@ module.exports = function (source, map, meta) {
 
 function getDependencies(source, sourcePath) {
     let dependecies = [];
-    const dependencyPattern = /<%[_\W]?\s*include\(['"`](.*)['"`]/g;
+    const dependencyPattern = /<%[_\W]?\s*include((\(['"`](.*)['"`])|(\s+([^\s-]+)\s*[\W_]?%>))/g;
 
     let matches = dependencyPattern.exec(source);
     while (matches) {
-        const fileName = matches[1].endsWith('.ejs') ? matches[1] : `${matches[1]}.ejs`;
-
-        if (!dependecies.includes(matches)) {
-            dependecies.push(path.join(sourcePath, fileName));
+        let fileName = matches[5] || matches[3];
+        if (!fileName.endsWith('.ejs')) {
+            fileName += '.ejs';
         }
+
+        const filePath = path.join(sourcePath, fileName);
+
+        if (!dependecies.includes(filePath)) {
+            dependecies.push(filePath);
+        }
+
         matches = dependencyPattern.exec(source);
     }
 
