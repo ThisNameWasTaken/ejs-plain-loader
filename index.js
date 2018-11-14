@@ -2,8 +2,7 @@ const { promisify } = require('util');
 const readFile = promisify(require('fs').readFile);
 const ejs = require('ejs');
 const { getOptions } = require('loader-utils');
-
-let cachedDependencies = {};
+const path = require('path');
 
 module.exports = function (source, map, meta) {
     const callback = this.async();
@@ -18,29 +17,22 @@ module.exports = function (source, map, meta) {
         try {
             const template = ejs.compile(source, options);
 
-            cachedDependencies.source = [];
-
             const addDependencies = async dependency => {
                 if (!this.getDependencies().includes(dependency)) {
                     this.addDependency(dependency);
-                    cachedDependencies.source.push(dependency);
                 }
 
                 const source = await readFile(dependency, 'utf8');
-                const subTemplate = ejs.compile(source, Object.assign(options, { filename: dependency }));
-                if (subTemplate.dependencies.length) {
-                    await Promise.all(subTemplate.dependencies.map(addDependencies));
-                }
+                const dependencies = getDependencies(source, path.join(dependency, '..'));
+                await Promise.all(dependencies.map(addDependencies));
 
                 return Promise.resolve();
             }
 
-            await Promise.all(template.dependencies.map(addDependencies));
+            const dependencies = getDependencies(source, path.join(options.filename, '..'));
+            await Promise.all(dependencies.map(addDependencies));
             cb(null, template(options.data || {}));
         } catch (error) {
-            if (cachedDependencies.source) {
-                cachedDependencies.source.forEach(this.addDependency);
-            }
             cb(error);
         }
     }
@@ -51,4 +43,21 @@ module.exports = function (source, map, meta) {
         }
         callback(null, result, map, meta);
     });
+}
+
+function getDependencies(source, sourcePath) {
+    let dependecies = [];
+    const dependencyPattern = /<%[_\W]?\s*include\(['"`](.*)['"`]/g;
+
+    let matches = dependencyPattern.exec(source);
+    while (matches) {
+        const fileName = matches[1].endsWith('.ejs') ? matches[1] : `${matches[1]}.ejs`;
+
+        if (!dependecies.includes(matches)) {
+            dependecies.push(path.join(sourcePath, fileName));
+        }
+        matches = dependencyPattern.exec(source);
+    }
+
+    return dependecies;
 }
