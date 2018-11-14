@@ -71,11 +71,7 @@ module.exports = {
     }) %>
 ```
 
-__Note:__ When adding partials use this syntax `<%- include('partials/navbar.ejs') %>` as opposed to `<%- import partials/navbar %>`.
-
-__Why?:__ Adding partials using the `<%- import partials/navbar %>` does not add the `navbar.ejs` file to the loader dependecies which means that if you make a change inside `navbar.ejs` that change will not be picked up by the loader so you will have to save `index.ejs` (or whatever your parent template is called) as well, where as adding partials like `<% import('partials/navbar') %>` solves this problem.
-
-__Example:__
+_Example:_
 
 `index.ejs`
 ```html
@@ -117,6 +113,36 @@ __Example:__
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><%= title %></title>
+```
+
+__Note:__ When you import a file using the `import partials/navbar` syntax you have to use this syntax across all of the files you are including in `navbar.ejs`. 
+
+_Example_:
+
+`index.ejs`
+```html
+<!DOCTYPE html>
+<html lang="en">
+    ...
+    <body>
+    ...
+    <%- include partials/navbar %>
+    ...
+    </body>
+</html>
+```
+`navbar.ejs`
+```html
+<!DOCTYPE html>
+<html lang="en">
+    ...
+    <body>
+    ...
+    <%- include('partials/navbar.ejs') %>   <!-- Throws an error -->
+    <%- include partials/navbar %>          <!-- Works fine -->
+    ...
+    </body>
+</html>
 ```
 
 ## Tags
