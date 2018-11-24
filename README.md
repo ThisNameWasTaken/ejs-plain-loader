@@ -10,10 +10,27 @@
 
 ## Instalation
 ```
-npm install --save-dev ejs-plain-loader ejs
+npm install --save-dev ejs-plain-loader
 ```
 
-_NOTE:_ EJS is a peer dependency so you also need to install it.
+## EJS Example
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%= include('partials/head.ejs') %>
+</head>
+<body>
+    <%= include('partials/navbar.ejs') %>
+
+    <main>
+        <!-- ... -->
+    </main>
+
+    <%= include('partials/footer.ejs') %>
+</body>
+</html>
+```
 
 ## Usage
 Inside your `webpack config file` add the fallowing rules
@@ -143,6 +160,34 @@ _Example_:
     ...
     </body>
 </html>
+```
+
+## Importing JavaScript or JSON files
+`index.ejs`
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- 
+        const meta = require('../data/index-meta.js');
+        include('partials/header.ejs', meta);
+    %>
+</head>
+...
+</html>
+```
+
+`index-meta.js`
+```js
+module.exports = {
+    title: 'Webpack Starter App',
+    author: 'John Doe',
+    keywords: ['lorem', 'ipsum', 'dolor', 'sit', 'amet'],
+    description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit.',
+    customFunction: function() {
+        // ...
+    }
+}
 ```
 
 ## Tags
