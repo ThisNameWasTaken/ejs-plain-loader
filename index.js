@@ -1,5 +1,3 @@
-const { promisify } = require('util');
-const readFile = promisify(require('fs').readFile);
 const { readFileSync } = require('fs');
 const _eval = require('eval');
 const ejs = require('./ejs');
@@ -15,22 +13,21 @@ module.exports = function (source, map, meta) {
         compileDebug: this.debug || false
     }, getOptions(this));
 
-    const compileEjs = async (source, cb) => {
+    const compileEjs = (source, cb) => {
         try {
-            const addDependencies = async dependency => {
+            const addDependencies = dependency => {
                 if (!this.getDependencies().includes(dependency)) {
                     this.addDependency(dependency);
                 }
 
-                const source = await readFile(dependency, 'utf8');
+                const source = readFileSync(dependency, 'utf8');
                 const dependencies = getDependencies(source, path.join(dependency, '..'));
-                await Promise.all(dependencies.map(addDependencies));
-
-                return Promise.resolve();
+                dependencies.map(addDependencies);
             }
 
             const dependencies = getDependencies(source, path.join(options.filename, '..'));
-            await Promise.all(dependencies.map(addDependencies));
+            dependencies.map(addDependencies);
+
             const template = ejs.compile(source, options);
             template.dependencies.map(dependency => !this.getDependencies().includes(dependency) && this.addDependency(dependency));
 
@@ -119,14 +116,14 @@ ejs.Template.prototype.injectRequiredFiles = function () {
 
         if (fileName.endsWith('.js')) {
             // evaluate the javascript inside the required file and replace require statement with that
-            const fileContent = _eval(readFileSync(filePath, { encoding: 'utf-8' }));
+            const fileContent = _eval(readFileSync(filePath, 'utf8'));
             const stringifiedObject = JSON.stringify(fileContent, serialize)
                 .replace(/(\\")|`/g, "\\`") // escape double quotes and backticks
                 .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation 
             source = source.replace(statementToReplace, `JSON.parse(\`${stringifiedObject}\`, ${unserialize.toString()})`); // since we are injecting a serialized json object into the file we have to parse it in order to use it as a js object
         } else if (fileName.endsWith('.json')) {
             // replace the require statement with the json file
-            const fileContent = readFileSync(filePath, { encoding: 'utf-8' });
+            const fileContent = readFileSync(filePath, 'utf8');
             source = source.replace(statementToReplace, fileContent);
         }
 
