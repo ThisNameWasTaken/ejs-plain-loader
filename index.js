@@ -1,5 +1,7 @@
 const { promisify } = require('util');
 const readFile = promisify(require('fs').readFile);
+const { readFileSync } = require('fs');
+const _eval = require('eval');
 const ejs = require('./ejs');
 const { getOptions } = require('loader-utils');
 const path = require('path');
@@ -114,11 +116,12 @@ ejs.Template.prototype.injectRequiredFiles = function () {
         }
 
         // replace the require statement with the module export
-        const fileContent = require(filePath);
+        const fileContent = _eval(readFileSync(filePath, { encoding: 'utf-8' }));
         const statementToReplace = new RegExp(`require\\(['"\`]${fileName}['"\`]\\)`);
         const stringifiedObject = JSON.stringify(fileContent, serialize)
             .replace(/(\\")|`/g, "\\`") // escape double quotes and backticks
-            .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation
+            .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation 
+
         source = source.replace(statementToReplace, `JSON.parse(\`${stringifiedObject}\`, ${unserialize.toString()})`); // since we are injecting a serialized json object into the file we have to parse it in order to use it as an object
 
         matches = requirePattern.exec(source);
