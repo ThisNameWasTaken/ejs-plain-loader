@@ -98,7 +98,6 @@ ejs.Template.prototype.parseTemplateText = function () {
     return arr;
 }
 
-
 ejs.Template.prototype.injectRequiredFiles = function () {
     let source = this.templateText;
     const sourcePath = this.opts.filename;
@@ -110,19 +109,26 @@ ejs.Template.prototype.injectRequiredFiles = function () {
         const fileName = matches[1];
         const filePath = path.join(sourcePath, '..', fileName);
 
-        // Store required files as dependencies
+        // store required files as dependencies
         if (!this.dependencies.includes(filePath)) {
             this.dependencies.push(filePath);
         }
 
-        // replace the require statement with the module export
-        const fileContent = _eval(readFileSync(filePath, { encoding: 'utf-8' }));
+        // replace the require statement with either the module export or json file
         const statementToReplace = new RegExp(`require\\(['"\`]${fileName}['"\`]\\)`);
-        const stringifiedObject = JSON.stringify(fileContent, serialize)
-            .replace(/(\\")|`/g, "\\`") // escape double quotes and backticks
-            .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation 
 
-        source = source.replace(statementToReplace, `JSON.parse(\`${stringifiedObject}\`, ${unserialize.toString()})`); // since we are injecting a serialized json object into the file we have to parse it in order to use it as an object
+        if (fileName.endsWith('.js')) {
+            // evaluate the javascript inside the required file and replace require statement with that
+            const fileContent = _eval(readFileSync(filePath, { encoding: 'utf-8' }));
+            const stringifiedObject = JSON.stringify(fileContent, serialize)
+                .replace(/(\\")|`/g, "\\`") // escape double quotes and backticks
+                .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation 
+            source = source.replace(statementToReplace, `JSON.parse(\`${stringifiedObject}\`, ${unserialize.toString()})`); // since we are injecting a serialized json object into the file we have to parse it in order to use it as a js object
+        } else if (fileName.endsWith('.json')) {
+            // replace the require statement with the json file
+            const fileContent = readFileSync(filePath, { encoding: 'utf-8' });
+            source = source.replace(statementToReplace, fileContent);
+        }
 
         matches = requirePattern.exec(source);
     }
