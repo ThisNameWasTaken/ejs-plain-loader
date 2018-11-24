@@ -7,7 +7,7 @@
     "url": "https://github.com/ThisNameWasTaken/ejs-plain-loader.git"
   },
   "bugs": {
-    "url": "https://github.com/ThisNameWasTaken/ejs-plain-loader"
+    "url": "https://github.com/ThisNameWasTaken/ejs-plain-loader/issues"
   },
   "main": "index.js",
   "keywords": [
@@ -25,11 +25,5 @@
   "license": "MIT",
   "dependencies": {
     "loader-utils": "^1.1.0"
-  },
-  "peerDependencies": {
-    "ejs": "^2.6.1"
-  },
-  "devDependencies": {
-    "ejs": "^2.6.1"
   }
 }
