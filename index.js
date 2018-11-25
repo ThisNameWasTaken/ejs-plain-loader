@@ -146,5 +146,5 @@ ejs.Template.prototype.injectRequiredFiles = function () {
     return source;
 }
 
-const serialize = (key, val) => typeof val === 'function' ? '__isFunc:' + val.toString() : val;
+const serialize = (key, val) => typeof val === 'function' ? '__isFunc:' + val.toString().replace(/\r|\n/g, '') : val;
 const unserialize = (key, val) => typeof val === 'string' && val.startsWith('__isFunc:' + 'function') ? eval('(' + val.replace('__isFunc:', '') + ')') : val;
