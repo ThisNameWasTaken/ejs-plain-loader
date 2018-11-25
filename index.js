@@ -1,6 +1,6 @@
-const { promisify } = require('util');
-const readFile = promisify(require('fs').readFile);
-const ejs = require('ejs');
+const { readFileSync } = require('fs');
+const _eval = require('eval');
+const ejs = require('./ejs');
 const { getOptions } = require('loader-utils');
 const path = require('path');
 
@@ -13,24 +13,23 @@ module.exports = function (source, map, meta) {
         compileDebug: this.debug || false
     }, getOptions(this));
 
-    const compileEjs = async (source, cb) => {
+    const compileEjs = (source, cb) => {
         try {
-            const template = ejs.compile(source, options);
-
-            const addDependencies = async dependency => {
+            const addDependencies = dependency => {
                 if (!this.getDependencies().includes(dependency)) {
                     this.addDependency(dependency);
                 }
 
-                const source = await readFile(dependency, 'utf8');
+                const source = readFileSync(dependency, 'utf8');
                 const dependencies = getDependencies(source, path.join(dependency, '..'));
-                await Promise.all(dependencies.map(addDependencies));
-
-                return Promise.resolve();
+                dependencies.map(addDependencies);
             }
 
             const dependencies = getDependencies(source, path.join(options.filename, '..'));
-            await Promise.all(dependencies.map(addDependencies));
+            dependencies.map(addDependencies);
+
+            const template = ejs.compile(source, options);
+
             cb(null, template(options.data || {}));
         } catch (error) {
             cb(error);
@@ -46,6 +45,26 @@ module.exports = function (source, map, meta) {
 }
 
 function getDependencies(source, sourcePath) {
+    return getEjsDependencies(source, sourcePath).concat(getRequireDependencies(source, sourcePath));
+}
+
+function getRequireDependencies(source, sourcePath) {
+    let dependecies = [];
+    const requirePattern = /require\(['"`](.*)['"`]\)/g;
+
+    let matches = requirePattern.exec(source);
+    while (matches) {
+        const fileName = matches[1];
+        const filePath = path.join(sourcePath, fileName);
+
+        dependecies.push(filePath);
+        matches = requirePattern.exec(source);
+    }
+
+    return dependecies;
+}
+
+function getEjsDependencies(source, sourcePath) {
     let dependecies = [];
     const dependencyPattern = /<%[_\W]?\s*include((\(['"`](.*)['"`])|(\s+([^\s-]+)\s*[\W_]?%>))/g;
 
@@ -67,3 +86,65 @@ function getDependencies(source, sourcePath) {
 
     return dependecies;
 }
+
+ejs.Template.prototype.parseTemplateText = function () {
+    var str = this.injectRequiredFiles();
+    var pat = this.regex;
+    var result = pat.exec(str);
+    var arr = [];
+    var firstPos;
+
+    while (result) {
+        firstPos = result.index;
+
+        if (firstPos !== 0) {
+            arr.push(str.substring(0, firstPos));
+            str = str.slice(firstPos);
+        }
+
+        arr.push(result[0]);
+        str = str.slice(result[0].length);
+        result = pat.exec(str);
+    }
+
+    if (str) {
+        arr.push(str);
+    }
+
+    return arr;
+}
+
+ejs.Template.prototype.injectRequiredFiles = function () {
+    let source = this.templateText;
+    const sourcePath = this.opts.filename;
+
+    const requirePattern = /require\(['"`](.*)['"`]\)/g;
+
+    let matches = requirePattern.exec(source);
+    while (matches) {
+        const fileName = matches[1];
+        const filePath = path.join(sourcePath, '..', fileName);
+
+        // replace the require statement with either the module export or json file
+        const statementToReplace = new RegExp(`require\\(['"\`]${fileName}['"\`]\\)`);
+
+        if (fileName.endsWith('.js')) {
+            // evaluate the javascript inside the required file and replace require statement with that
+            const fileContent = _eval(readFileSync(filePath, 'utf8'));
+            const stringifiedObject = JSON.stringify(fileContent, serialize)
+                .replace(/(\\")|`/g, "\\`") // escape double quotes and backticks
+                .replace(/`[\s\S]*?(\${[\s\S]*})[\s\S]*?`/, (string, variable) => string.replace(variable, '\\' + variable)); // escape the '$' symbol when used for string interpolation 
+            source = source.replace(statementToReplace, `JSON.parse(\`${stringifiedObject}\`, ${unserialize.toString()})`); // since we are injecting a serialized json object into the file we have to parse it in order to use it as a js object
+        } else if (fileName.endsWith('.json')) {
+            // replace the require statement with the json file
+            const fileContent = readFileSync(filePath, 'utf8');
+            source = source.replace(statementToReplace, fileContent);
+        }
+
+        matches = requirePattern.exec(source);
+    }
+    return source;
+}
+
+const serialize = (key, val) => typeof val === 'function' ? '__isFunc:' + val.toString() : val;
+const unserialize = (key, val) => typeof val === 'string' && val.startsWith('__isFunc:' + 'function') ? eval('(' + val.replace('__isFunc:', '') + ')') : val;
