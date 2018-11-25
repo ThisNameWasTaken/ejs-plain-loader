@@ -29,7 +29,6 @@ module.exports = function (source, map, meta) {
             dependencies.map(addDependencies);
 
             const template = ejs.compile(source, options);
-            template.dependencies.map(dependency => !this.getDependencies().includes(dependency) && this.addDependency(dependency));
 
             cb(null, template(options.data || {}));
         } catch (error) {
@@ -46,6 +45,26 @@ module.exports = function (source, map, meta) {
 }
 
 function getDependencies(source, sourcePath) {
+    return getEjsDependencies(source, sourcePath).concat(getRequireDependencies(source, sourcePath));
+}
+
+function getRequireDependencies(source, sourcePath) {
+    let dependecies = [];
+    const requirePattern = /require\(['"`](.*)['"`]\)/g;
+
+    let matches = requirePattern.exec(source);
+    while (matches) {
+        const fileName = matches[1];
+        const filePath = path.join(sourcePath, fileName);
+
+        dependecies.push(filePath);
+        matches = requirePattern.exec(source);
+    }
+
+    return dependecies;
+}
+
+function getEjsDependencies(source, sourcePath) {
     let dependecies = [];
     const dependencyPattern = /<%[_\W]?\s*include((\(['"`](.*)['"`])|(\s+([^\s-]+)\s*[\W_]?%>))/g;
 
@@ -99,17 +118,12 @@ ejs.Template.prototype.injectRequiredFiles = function () {
     let source = this.templateText;
     const sourcePath = this.opts.filename;
 
-    const requirePattern = /require\(['"`](.*)['"`]\)/;
+    const requirePattern = /require\(['"`](.*)['"`]\)/g;
 
     let matches = requirePattern.exec(source);
     while (matches) {
         const fileName = matches[1];
         const filePath = path.join(sourcePath, '..', fileName);
-
-        // store required files as dependencies
-        if (!this.dependencies.includes(filePath)) {
-            this.dependencies.push(filePath);
-        }
 
         // replace the require statement with either the module export or json file
         const statementToReplace = new RegExp(`require\\(['"\`]${fileName}['"\`]\\)`);
