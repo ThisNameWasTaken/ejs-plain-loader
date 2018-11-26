@@ -8,12 +8,21 @@
 
 [EJS](http://www.embeddedjs.com/) (Embeded JavaScript) loader for [Webpack](http://webpack.js.org). It converts EJS templates to plain HTML using the [EJS npm package](https://www.npmjs.com/package/ejs).
 
-## Instalation
+* [installation](#installation)
+* [example](#example)
+* [usage](#usage)
+* [importing partials](#importing-partials)
+* [importing js/json files](#importing-files)
+* [tags](#tags)
+* [options](#options)
+* [more info](#more-info)
+
+## <a name="installation"></a> Instalation
 ```
-npm install --save-dev ejs-plain-loader
+npm i -D ejs-plain-loader
 ```
 
-## EJS Example
+## <a name="example"></a> EJS Example
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -32,50 +41,40 @@ npm install --save-dev ejs-plain-loader
 </html>
 ```
 
-## Usage
+## <a name="installation"></a> Usage
+
+__NOTE:__ You need to chain the ejs-plain-loader with an html loader such as the [html-loader](https://www.npmjs.com/package/html-loader) and use a template plugin such as the [html-webpack-plugin](https://www.npmjs.com/package/html-webpack-plugin). To install these run `npm i -D html-loader html-webpack-plugin`.
+
 Inside your `webpack config file` add the fallowing rules
 ```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 module.exports = {
-    ...
-
+    // ...
     module: {
-    rules: [{
-        test: /\.ejs$/i,
-        use: {
-            loader: 'ejs-plain-loader'
-        }
-    }]
-
-    ...
-}
-```
-
-You can chain the ejs-plain-loader with other loaders such as the [html-loader](https://www.npmjs.com/package/html-loader)
-
-```js
-module.exports = {
-    ...
-
-    module: {
-    rules: [{
-        test: /\.ejs$/i,
-        use: [{
-            loader: 'html-loader',
-            options: {
-                attrs: [':src', ':data-src', 'source:srcset', 'source:data-srcset'], // load(require) images, videos or other resources
-                interpolate: true
-            }
-        }, {
-            loader: 'ejs-plain-loader'
+        rules: [{
+            test: /\.ejs$/i,
+            use: [{
+                loader: 'html-loader', // loader for html files goes here
+                options: {
+                    attrs: [':src', ':data-src', 'source:srcset', 'source:data-srcset'], // load(require) images, videos or other resources
+                    interpolate: true
+                }
+            }, {
+                loader: 'ejs-plain-loader'
+            }]
         }]
-    }]
-
-    ...
+    },
+    plugins: [
+        new HtmlWebpackPlugin({ // plugin for templates goes here
+            template: './src/views/index.ejs'
+        })
+    ]
+    // ...
 }
 ```
 
-## Importing partials
-
+## <a name="importing-partials"></a> Importing partials
 ```html
     <!-- plain import -->
     <%- include('partials/my-awesome-partial.ejs') %>
@@ -162,7 +161,7 @@ _Example_:
 </html>
 ```
 
-## Importing JavaScript or JSON files
+## <a name="importing-files"></a> Importing JavaScript or JSON files
 `index.ejs`
 ```html
 <!DOCTYPE html>
@@ -173,7 +172,7 @@ _Example_:
         include('partials/header.ejs', meta);
     %>
 </head>
-...
+<!-- ... -->
 </html>
 ```
 
@@ -190,11 +189,11 @@ module.exports = {
 }
 ```
 
-## Tags
+## <a name="tags"></a> Tags
 See [tags](https://www.npmjs.com/package/ejs#tags)
 
-## Options
+## <a name="options"></a> Options
 See [EJS options](https://www.npmjs.com/package/ejs#options)
 
-## More info
+## <a name="more-info"></a> More info
 For more info on how to use EJS visit their [npm package page](https://www.npmjs.com/package/ejs) or their [official website](http://ejs.co/)
