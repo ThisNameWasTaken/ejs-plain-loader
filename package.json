@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/ThisNameWasTaken/ejs-plain-loader/issues"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "keywords": [
     "ejs",
     "loader",
