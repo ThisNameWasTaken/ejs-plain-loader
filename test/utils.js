@@ -1,3 +1,4 @@
+import compiler from './compiler.js';
 import { readFile as _readFile } from 'fs';
 import { promisify } from 'util';
 
@@ -20,3 +21,13 @@ export const minify = string => string
     .replace(/(^\s+|\s+$)/g, '')    // remove whitespace from both ends of the string
     .replace(/\>\s\</g, '><')       // remove whitespace from html tags
     .replace(/(\r|\n)/g, '');       // remove new lines
+
+/**
+ * @param {string} fixturePath The path to the fixture file.
+ * @returns {Promise<string>} The exported output from webpack.
+ */
+export const getCompiledOutput = async fixturePath => minify((await compiler(fixturePath))
+    .toJson().modules[0].source
+    .match(/module\.exports\s*=\s*"(.*)";/)[1]  // get the exported output from webpack
+    .replace(/(\\r|\\n)/g, '')                  // remove escaped endlines
+    .replace(/\\"/g, '\"'));                    // remove a slash from escaped quotes
