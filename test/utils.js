@@ -19,7 +19,8 @@ export const readFile = async (path, options = 'utf8') => minify(await readFileP
 export const minify = string => string
     .replace(/\s{2,}/g, ' ')        // remove duplicated whitespace
     .replace(/(^\s+|\s+$)/g, '')    // remove whitespace from both ends of the string
-    .replace(/\>\s\</g, '><')       // remove whitespace from html tags
+    .replace(/(\>)\s+/g, '$1')      // remove whitespace after html tags
+    .replace(/\s+(\<)/g, '$1')      // remove whitespace before html tags
     .replace(/(\r|\n)/g, '');       // remove new lines
 
 /**
