@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head.ejs', {
+            author: 'John Doe',
+            title: 'Lorem Ipsum',
+            keywords: ['Lorem', 'Ipsum', 'Dolor', 'Sit', 'Amet'],
+            description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam cupiditate incidunt ab magni rem voluptates distinctio.'
+    }) %>
+</head>
+<body>
+    <%- include('partials/nested-partial') %>
+
+    <main>
+        <% for(let i = 0; i < 10; i++) { %>
+            <%- include('partials/section', {
+                content: `Section: ${i + 1}`
+            }) %>
+        <% } %>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
