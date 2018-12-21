@@ -29,3 +29,8 @@ test('includes json files', async () => {
     const [ejsOutput, htmlOutput] = await getOutputs('include-json');
     expect(ejsOutput).toBe(htmlOutput);
 });
+
+test('includes common js modules', async () => {
+    const [ejsOutput, htmlOutput] = await getOutputs('include-common-js');
+    expect(ejsOutput).toBe(htmlOutput);
+});
