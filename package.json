@@ -29,10 +29,11 @@
   "author": "Adrian Dinca",
   "license": "MIT",
   "scripts": {
+    "jest": "jest",
+    "webpack": "webpack",
     "test": "jest"
   },
   "dependencies": {
-    "eval": "^0.1.2",
     "loader-utils": "^1.1.0"
   },
   "devDependencies": {
