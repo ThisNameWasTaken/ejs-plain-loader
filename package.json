@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/ThisNameWasTaken/ejs-plain-loader/issues"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "keywords": [
     "ejs",
     "loader",
@@ -28,8 +28,20 @@
   ],
   "author": "Adrian Dinca",
   "license": "MIT",
+  "scripts": {
+    "jest": "jest",
+    "webpack": "webpack",
+    "test": "jest"
+  },
   "dependencies": {
-    "eval": "^0.1.2",
     "loader-utils": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-jest": "^23.6.0",
+    "babel-preset-env": "^1.7.0",
+    "html-loader": "^0.5.5",
+    "jest": "^23.6.0",
+    "memory-fs": "^0.4.1",
+    "webpack": "^4.26.1"
   }
 }
