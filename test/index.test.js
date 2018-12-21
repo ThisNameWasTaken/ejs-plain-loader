@@ -24,3 +24,8 @@ test('does not remove require statements outside ejs tags', async () => {
     const [ejsOutput, htmlOutput] = await getOutputs('outside-ejs');
     expect(ejsOutput).toBe(htmlOutput);
 });
+
+test('includes json files', async () => {
+    const [ejsOutput, htmlOutput] = await getOutputs('include-json');
+    expect(ejsOutput).toBe(htmlOutput);
+});
