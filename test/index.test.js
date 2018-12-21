@@ -19,3 +19,8 @@ test('includes ejs partials', async () => {
     const [ejsOutput, htmlOutput] = await getOutputs('include-partials');
     expect(ejsOutput).toBe(htmlOutput);
 });
+
+test('does not remove require statements outside ejs tags', async () => {
+    const [ejsOutput, htmlOutput] = await getOutputs('outside-ejs');
+    expect(ejsOutput).toBe(htmlOutput);
+});
