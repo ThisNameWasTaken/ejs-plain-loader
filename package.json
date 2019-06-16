@@ -1,6 +1,6 @@
 {
   "name": "ejs-plain-loader",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "EJS webpack loader",
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "ejs": "^2.6.2",
     "loader-utils": "^1.2.3"
   },
   "devDependencies": {
