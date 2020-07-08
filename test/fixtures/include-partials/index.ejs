@@ -12,11 +12,24 @@
     <%- include('partials/nested-partial') %>
 
     <main>
+        <div class="iterate">
         <% for(let i = 0; i < 10; i++) { %>
             <%- include('partials/section', {
                 content: `Section: ${i + 1}`
             }) %>
         <% } %>
+        </div>
+        <div class="variable-formats">
+            <%- include('partials/section', {
+                content: `Section: Format 1`
+            }) %>
+            <%- include('partials/section', { content: `Section: Format 2` }) %>
+            <%- include('partials/section', { content:
+                `Section: Format 3` }) %>
+            <%- include('partials/section', {   
+                       content:    `Section: Format 4`   
+            }) %>
+        </div>
     </main>
 
     <%- include('partials/footer') %>
